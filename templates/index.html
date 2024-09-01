@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translator and Text-to-Speech</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Translator and Text-to-Speech</h1>
+    <textarea id="inputText" rows="4" cols="50" placeholder="Enter text to translate"></textarea>
+    <br>
+    <select id="targetLanguage">
+        <option value="Russian">Russian</option>
+        <option value="English">English</option>
+        <!-- Add more language options as needed -->
+    </select>
+    <br>
+    <button onclick="translateAndSpeak()">Translate and Speak</button>
+    <br>
+    <audio id="audioPlayer" controls></audio>
+
+    <script>
+        const socket = io();
+
+        function translateAndSpeak() {
+            const text = document.getElementById('inputText').value;
+            const targetLanguage = document.getElementById('targetLanguage').value;
+            socket.emit('translate_and_speak', {text: text, target_language: targetLanguage});
+        }
+
+        socket.on('audio_data', function(data) {
+            const audio = new Audio('data:audio/mp3;base64,' + data.audio);
+            audio.play();
+            document.getElementById('audioPlayer').src = 'data:audio/mp3;base64,' + data.audio;
+        });
+
+        socket.on('error', function(data) {
+            console.error('Error:', data.message);
+            alert('An error occurred: ' + data.message);
+        });
+    </script>
+</body>
+</html>
